@@ -1,0 +1,21 @@
+#!/bin/bash
+#Getting the Value of the Thresholds
+init() {
+echo "Enter value for the Critical Threshold: "
+read c
+echo "Enter value for the Warning Threshold: "
+read w
+echo "Enter value for the Email Address: "
+read e
+}
+init
+while [ ${w} -ge ${c} ]
+do
+  echo "Value of Warning Threshold must not be greater than or equal to Critical Threshold"
+  init
+done
+  echo "Memory_Check -c ${c}, -w ${w}, -e ${e}"
+#Comparing UsedMem with Thresholds in %
+free | awk 'MEMU == 2 { print $3*100/$2 }'
+
+
