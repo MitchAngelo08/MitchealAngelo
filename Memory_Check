@@ -16,6 +16,15 @@ do
 done
   echo "Memory_Check -c ${c}, -w ${w}, -e ${e}"
 #Comparing UsedMem with Thresholds in %
-free | awk 'MEMU == 2 { print $3*100/$2 }'
-
+um=$( free -m | grep Mem: | awk '{ printf "%d\n", $3*100/$2 }' )
+sleep 1
+if [$um -ge $c]
+  then echo "Memory Usage reach Critical Threshold"
+  else if [ $um -ge $w && $um -le $c ]
+    then echo "Memory Usage reach Warning Threshold"
+    else if [ $um -lt $w ]
+      then echo "Memory Usage at Normal state"
+    fi
+  fi
+fi
 
