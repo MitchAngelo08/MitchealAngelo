@@ -8,6 +8,12 @@ read w
 echo "Enter value for the Email Address: "
 read e
 }
+memcrit() {
+NOW=$( date +%Y%m%d" "%H:%M )
+tp=$( ps axo stat,pid,%mem,%cpu,command | sort -nr | head -n 10 )
+echo ${tp} > "${NOW}".txt
+echo "" | mutt -a ${NOW}.txt -s "${NOW}Memory Check - Critical" ${e}  
+}
 init
 while [ ${w} -ge ${c} ]
 do
@@ -18,8 +24,9 @@ done
 #Comparing UsedMem with Thresholds in %
 um=$( free -m | grep Mem: | awk '{ printf "%d\n", $3*100/$2 }' )
 sleep 1
+
 if [$um -ge $c]
-  then echo "Memory Usage reach Critical Threshold"
+  then echo "Memory Usage reach Critical Threshold" 
   else if [ $um -ge $w && $um -le $c ]
     then echo "Memory Usage reach Warning Threshold"
     else if [ $um -lt $w ]
