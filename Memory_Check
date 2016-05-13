@@ -55,7 +55,7 @@ if [$um -ge $c]
   then echo "Memory Usage reach Critical Threshold"
   memcrit
   exit 2
-  else if [ $um -ge $w && $um -le $c ]
+  else if [ $um -ge $w ] && [ $um -le $c ]
     then echo "Memory Usage reach Warning Threshold"
     exit 1
     else if [ $um -lt $w ]
