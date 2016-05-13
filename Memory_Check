@@ -1,36 +1,63 @@
 #!/bin/bash
-#Getting the Value of the Thresholds
-init() {
-echo "Enter value for the Critical Threshold: "
-read c
-echo "Enter value for the Warning Threshold: "
-read w
-echo "Enter value for the Email Address: "
-read e
-}
-memcrit() {
+FILE=$( basename %0 ).pid
+memory() {
 NOW=$( date +%Y%m%d" "%H:%M )
 tp=$( ps axo stat,pid,%mem,%cpu,command | sort -nr | head -n 10 )
-echo ${tp} > "${NOW}".txt
-echo "" | mutt -a ${NOW}.txt -s "${NOW}Memory Check - Critical" ${e}  
+echo ${tp} > $FILE
+echo "" | mutt -a "$FILE" -s "${NOW}Memory Check - Critical" -- ${e}  
 }
-init
-while [ ${w} -ge ${c} ]
-do
-  echo "Value of Warning Threshold must not be greater than or equal to Critical Threshold"
-  init
+help() {
+echo "Options that need parameters are: Critical(-c), Warning(-w) and Email(-e)"
+}
+c=-c
+w=-w
+e=-e
+OPTARG=$#
+if [ $OPTARG -eq 0] then
+  help
+fi
+
+while getopts ":c:w:e:" opt; do
+case $opt in
+  c)
+    c=$OPTARG
+    echo "-c: $OPTARG"
+    ;;
+  w)
+    w=$OPTARG
+    echo "-w: $OPTARG"
+    ;;
+  e)
+    e=$OPTARG
+    echo "-e: $OPTARG"
+    ;;
+  \?)
+    echo "Invalid option: -$OPTARG" >&2
+    help
+    ;;
+  :)
+    echo "Option -$OPTARG requires a parameter" >&2
+    ;;
+esac
 done
-  echo "Memory_Check -c ${c}, -w ${w}, -e ${e}"
-#Comparing UsedMem with Thresholds in %
+shift $((OPTIND-1))
+
+if [ $c -le $w ]
+then echo "Critical threshold must not be less than or equal to Warning threshold"
+fi
+
 um=$( free -m | grep Mem: | awk '{ printf "%d\n", $3*100/$2 }' )
-sleep 1
 
 if [$um -ge $c]
-  then echo "Memory Usage reach Critical Threshold" 
+  then echo "Memory Usage reach Critical Threshold"
+  memcrit
+  exit 2
   else if [ $um -ge $w && $um -le $c ]
     then echo "Memory Usage reach Warning Threshold"
+    exit 1
     else if [ $um -lt $w ]
       then echo "Memory Usage at Normal state"
+      exit 0
     fi
   fi
 fi
