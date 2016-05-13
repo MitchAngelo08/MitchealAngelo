@@ -34,9 +34,11 @@ case $opt in
   \?)
     echo "Invalid option: -$OPTARG" >&2
     help
+    exit 2
     ;;
   :)
     echo "Option -$OPTARG requires a parameter" >&2
+    exit 1
     ;;
 esac
 done
@@ -44,6 +46,7 @@ shift $((OPTIND-1))
 
 if [ $c -le $w ]
 then echo "Critical threshold must not be less than or equal to Warning threshold"
+exit 1
 fi
 
 um=$( free -m | grep Mem: | awk '{ printf "%d\n", $3*100/$2 }' )
